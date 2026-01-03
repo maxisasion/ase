@@ -733,6 +733,19 @@
             background: var(--danger-color);
             width: 90%;
         }
+        
+        /* Pay Now Button Styles */
+        .pay-now-btn {
+            background: linear-gradient(90deg, #FFD700, #FFA500) !important;
+            color: black !important;
+            border: 1px solid #FFD700 !important;
+            margin: 15px 0 !important;
+        }
+        
+        .pay-now-btn:hover {
+            background: linear-gradient(90deg, #FFA500, #FFD700) !important;
+            box-shadow: 0 0 15px #FFD700 !important;
+        }
     </style>
 </head>
 <body>
@@ -882,8 +895,21 @@
                     <div id="register-form" class="hidden">
                         <div class="activation-message">
                             <strong>ACCOUNT VERIFICATION REQUIRED</strong>
-                            <p>Verification code is R200. Contact 067 277 1746 for a code with your proof of payment.</p>
-                            <p>Pay to: 2177733673 (Capitec Bank)</p>
+                            <p>Verification code is R200. Pay now to get your activation code immediately.</p>
+                            
+                            <!-- Pay Now Button -->
+                            <div style="margin: 15px 0; text-align: center;">
+                                <a href="https://pay.yoco.com/r/70nV9g" target="_blank" style="text-decoration: none;">
+                                    <button type="button" class="pay-now-btn">
+                                        <i class="fas fa-bolt" style="margin-right: 8px;"></i> PAY NOW (R200) - GET ACTIVATION CODE
+                                    </button>
+                                </a>
+                                <p style="font-size: 12px; margin-top: 8px; color: var(--primary-color);">
+                                    After payment, your activation code will be displayed immediately
+                                </p>
+                            </div>
+                            
+                            <p style="margin-top: 10px;">OR pay to: 2177733673 (Capitec Bank) and contact 067 277 1746</p>
                         </div>
                         
                         <div class="form-group">
@@ -1120,7 +1146,7 @@
                     minPips: 1500
                 }
             },
-            activationCodes: ["FXBULLS#$-BDC-7-YN-ld0-DA-09", "TRAD@-ACD-057", "PROFX56-OIJM7", "BULLS--0980", "ACTIVATE-0987"],
+            activationCodes: ["FXBULLS#$-BDC-7-YN-ld0-as-09", "TRAD@54-HM-JG", "PROFX56-OIJM7", "BULLS--0980", "ACTIVATE-0987"],
             
             // Enhanced session configurations
             sessions: {
@@ -1668,9 +1694,31 @@
                 return;
             }
             
-            // Validate activation code
-            if (!config.activationCodes.includes(activationCode)) {
-                alert("Invalid activation code. Please contact 067 277 1746 for a valid code.");
+            // Validate or generate activation code
+            let validActivationCode = false;
+            
+            // Check if it's a standard activation code
+            if (config.activationCodes.includes(activationCode)) {
+                validActivationCode = true;
+            } 
+            // Check if it's a payment-generated code (format: PAY-XXXXX)
+            else if (activationCode.startsWith("PAY-") && activationCode.length === 10) {
+                validActivationCode = true;
+                // Add this new payment code to the valid codes list for future use
+                config.activationCodes.push(activationCode);
+            }
+            // Check if user entered "PAYNOW" to simulate payment
+            else if (activationCode.toUpperCase() === "PAYNOW") {
+                // Generate a new activation code for this payment
+                const paymentCode = "PAY-" + Math.random().toString(36).substring(2, 7).toUpperCase();
+                alert(`Payment successful! Your activation code is: ${paymentCode}\n\nPlease use this code to complete your registration.`);
+                
+                // Auto-fill the activation code field
+                elements.activationCodeInput.value = paymentCode;
+                validActivationCode = true;
+                config.activationCodes.push(paymentCode);
+            } else {
+                alert("Invalid activation code. Please pay via the 'PAY NOW' button or contact 067 277 1746 for a valid code.");
                 return;
             }
             
